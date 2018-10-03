@@ -11,22 +11,36 @@ public class Ball : MonoBehaviour
 
 	private SpriteRenderer renderer;
 
+	private BallLauncher ballLauncher;
+
 	private void Awake()
 	{
 		rigidBody2D = GetComponent<Rigidbody2D>();
 		renderer = GetComponent<SpriteRenderer>();
+		
+        ballLauncher = FindObjectOfType<BallLauncher>();
+    
 	}
 
 	void Start()
 	{
-		Vector2 direction = new Vector2( Random.Range( 0f, 1f ), Random.Range( 0f , 1f ) );
-		rigidBody2D.AddForce( direction );
-		renderer.material.color  = new Color( Random.Range( 0f, 1.0f ), Random.Range( 0f, 1.0f ), Random.Range( 0f, 1.0f ), 1.0f );
+		//Vector2 direction = new Vector2( Random.Range( 0f, 1f ), Random.Range( 0f , 1f ) );
+		//rigidBody2D.AddForce( direction );
+		//renderer.material.color  = new Color( Random.Range( 0f, 1.0f ), Random.Range( 0f, 1.0f ), Random.Range( 0f, 1.0f ), 1.0f );
 	}
 
 	private void Update()
 	{
 		rigidBody2D.velocity = rigidBody2D.velocity.normalized * moveSpeed;
 	
+	}
+
+	private void OnCollisionEnter2D( Collision2D collision )
+	{
+		if( collision.collider.name == "Target" )
+		{
+			ballLauncher.ReturnBall();
+			gameObject.SetActive( false );
+		}
 	}
 }
