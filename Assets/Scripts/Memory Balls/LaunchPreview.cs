@@ -13,6 +13,8 @@ public class LaunchPreview : MonoBehaviour
     public void SetStartPoint(Vector3 worldPoint)
     {
         dragStartPoint = worldPoint;
+
+
         lineRenderer.SetPosition(0, dragStartPoint);
     }
 

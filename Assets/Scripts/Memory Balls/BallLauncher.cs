@@ -4,20 +4,29 @@ using UnityEngine;
 
 public class BallLauncher : MonoBehaviour
 {
+
+    [SerializeField] private Transform launcher;
     private Vector3 startDragPosition;
     private Vector3 endDragPosition;
     //private BlockSpawner blockSpawner;
-
     private Vector3 direction;
+
+
 
     private LaunchPreview launchPreview;
     private List<Ball> balls = new List<Ball>();
     private int ballsReady;
 
-    [SerializeField]
-    private Ball ballPrefab;
+    private  RaycastHit hit;
+
+    [SerializeField] private Ball ballPrefab;
 
     [SerializeField] private bool isOkToDrag = false;
+
+    public bool IsOkToDrag 
+    { 
+        get{ return isOkToDrag; } 
+    }
 
     private void Awake()
     {
@@ -47,40 +56,45 @@ public class BallLauncher : MonoBehaviour
             balls.Add(ball);
             ballsReady++;
         }
-        else if( ballsReady == 1 )
-        {
-            
-        }
-
-        
-     
+       
     }
 
     private void OnMouseOver()
     {
-        //If your mouse hovers over the GameObject with the script attached, output this message
-        Debug.Log("Mouse is over " + gameObject.name );
         isOkToDrag = true;
     }
 
-    private void OnMouseExit()
-    {
-        //The mouse is no longer hovering over the GameObject so output this message each frame
-        Debug.Log("Mouse is no longer on GameObject. " + gameObject.name );
-        //isOkToDrag = false;
-    }
 
     private void Update()
     {
+        
+        
+        // Does the ray intersect any objects excluding the player layer
+        if ( Physics.Raycast( transform.position, -direction, out hit, Mathf.Infinity ) )
+        {
+            Debug.DrawRay( transform.position, -direction * hit.distance, Color.yellow );
+            Debug.Log( "Did Hit" );
+        }
+         else
+         {
+            // Debug.DrawRay( transform.position, -direction * 10, Color.white );
+          //   Debug.Log( "Did not Hit" );
+         }
+        
+        
         if (ballsReady != balls.Count) // don't let the player launch until all balls are back.
             return;
 
-        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition) + Vector3.back * -10;
+        Vector3 worldPosition = Camera.main.ScreenToWorldPoint( Input.mousePosition ) + Vector3.back * -10;
+       // launcher.rotation = Quaternion.LookRotation( Vector3.back, worldPosition - transform.position );
+
+    
 
         if( !isOkToDrag )
         {
             return;
         }
+        
 
         if (Input.GetMouseButtonDown(0)  )
         {
@@ -94,7 +108,11 @@ public class BallLauncher : MonoBehaviour
         {
             EndDrag();
         }
+
+       
+        
     }
+
 
     private void EndDrag()
     {
@@ -108,13 +126,15 @@ public class BallLauncher : MonoBehaviour
     private IEnumerator LaunchBalls()
     {
         direction = endDragPosition - startDragPosition;
+        Debug.Log( direction );
         direction.Normalize();
+        Debug.Log( "Normalize : " + direction );
 
         foreach (var ball in balls)
         {
             ball.transform.position = transform.position;
             ball.gameObject.SetActive(true);
-            ball.GetComponent<Rigidbody2D>().AddForce(-direction);
+            ball.GetComponent<Rigidbody2D>().AddForce( -direction );
 
             yield return new WaitForSeconds(0.1f);
         }
@@ -126,11 +146,12 @@ public class BallLauncher : MonoBehaviour
     {
         endDragPosition = worldPosition;
 
-        Debug.Log( endDragPosition );
-
         Vector3 direction = endDragPosition - startDragPosition;
-
-        Debug.Log( "Direction " + direction );
+        
+        Debug.Log( "Direction " + direction.z );
+        Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
+        Debug.Log( "Local Rotation: " + rotation );
+        //launcher.rotation = rotation;
 
         launchPreview.SetEndPoint(transform.position - direction);
     }
