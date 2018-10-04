@@ -98,10 +98,11 @@ public class BallLauncher : MonoBehaviour
 
     private void EndDrag()
     {
-        Vector3 minDirection = new Vector3( 0.1f, 0.1f, 0.0f );
-
-        Debug.Log( Vector3.Distance( minDirection, direction ) );
-        StartCoroutine(LaunchBalls());
+    
+        float dist = Vector3.Distance( startDragPosition, endDragPosition );
+        
+        if( dist > 0.35f )
+            StartCoroutine(LaunchBalls());
     }
 
     private IEnumerator LaunchBalls()
